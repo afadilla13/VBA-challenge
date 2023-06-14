@@ -1,0 +1,166 @@
+Sub Multiple_year_stock_data()
+
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    Dim Ticker As String
+    Dim TotalStockVolume As LongLong
+    Dim Summary_Table_Row As Integer
+    Dim OpeningPrice As Double
+    Dim ClosingPrice As Double
+    Dim YearlyChange As Double
+    Dim PercentChange As Double
+    Dim MaxVolume As LongLong
+   
+    ' --------------------------------------------
+    ' LOOP THROUGH ALL SHEETS
+    ' --------------------------------------------
+
+    ' Set the workbook where your data is located
+    Set wb = ThisWorkbook
+
+    ' Loop through each worksheet in the workbook
+    For Each ws In wb.Worksheets
+    
+    ' Initialize variables for each worksheet
+    TotalStockVolume = 0
+    Summary_Table_Row = 2
+        
+    ' Loop through the rows in the worksheet
+    For i = 2 To ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
+    
+    'Assigns headers etc to columns and rows
+    ws.Cells(1, 9).Value = "Ticker"
+    ws.Cells(1, 10).Value = "Yearly Change"
+    ws.Cells(1, 11).Value = "Percent Change"
+    ws.Cells(1, 12).Value = "Total Volume"
+    ws.Cells(1, 16).Value = "Ticker"
+    ws.Cells(1, 17).Value = "Value"
+    ws.Cells(2, 15).Value = "Greatest % Increase"
+    ws.Cells(3, 15).Value = "Greatest % Decrease"
+    ws.Cells(4, 15).Value = "Greatest Total Volume"
+    
+    ' --------------------------------------------
+    ' YEARLY PRICE CHANGE
+    ' --------------------------------------------
+    
+    If ws.Cells(i, 1).Value <> ws.Cells(i + 1, 1).Value Then
+    ClosingPrice = ws.Cells(i, 6).Value
+    
+    ElseIf ws.Cells(i, 1).Value <> ws.Cells(i - 1, 1).Value Then
+    OpeningPrice = ws.Cells(i, 3).Value
+    
+    End If
+    
+    'Calculate The YearlyChange
+    YearlyChange = ClosingPrice - OpeningPrice
+    
+    ' Print the YearlyChange in the Summary Table
+    ws.Range("J" & Summary_Table_Row).Value = YearlyChange
+    
+    ' --------------------------------------------
+    ' PERCENTAGE PRICE CHANGE
+    ' --------------------------------------------
+    
+    If OpeningPrice > 0 And ClosingPrice > 0 Then
+    PercentChange = YearlyChange / OpeningPrice
+    ClosingPrice = 0
+    OpeningPrice = 0
+    End If
+    
+    ' Print the PercentChange in the Summary Table
+    ws.Range("K" & Summary_Table_Row).Value = FormatPercent(PercentChange)
+    
+    ' --------------------------------------------
+    ' BONUS
+    ' --------------------------------------------
+    
+    'Find the min and max values
+    MaxPercent = WorksheetFunction.Max(ws.Columns("K"))
+    MinPercent = WorksheetFunction.Min(ws.Columns("K"))
+    MaxVolume = WorksheetFunction.Max(ws.Columns("L"))
+        
+    ' Print the max, min & max volumes in the bonus table
+    ws.Range("Q2").Value = FormatPercent(MaxPercent)
+    ws.Range("Q3").Value = FormatPercent(MinPercent)
+    ws.Range("Q4").Value = MaxVolume
+    
+    
+    ' Apply the corresponding ticker if the value contains max & min values to the correct cells
+    If MaxPercent = ws.Range("K" & Summary_Table_Row - 1).Value Then
+    ws.Range("P2").Value = Ticker
+    
+    ElseIf MinPercent = ws.Range("K" & Summary_Table_Row - 1).Value Then
+    ws.Range("P3").Value = Ticker
+    
+    ElseIf MaxVolume = ws.Range("L" & Summary_Table_Row - 1).Value Then
+    ws.Range("P4").Value = Ticker
+    
+    End If
+    
+    ' --------------------------------------------
+    ' CONDITIONAL FORMATTING
+    ' --------------------------------------------
+    
+    If ws.Range("J" & Summary_Table_Row).Value > 0 Then
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+    
+    ElseIf ws.Range("J" & Summary_Table_Row).Value < 0 Then
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+    
+    Else
+    ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = x1None
+    
+    End If
+    
+    If ws.Range("K" & Summary_Table_Row).Value > 0 Then
+    ws.Range("K" & Summary_Table_Row).Interior.ColorIndex = 4
+    
+    ElseIf ws.Range("K" & Summary_Table_Row).Value < 0 Then
+    ws.Range("K" & Summary_Table_Row).Interior.ColorIndex = 3
+    
+    Else
+    ws.Range("K" & Summary_Table_Row).Interior.ColorIndex = x1None
+    
+    End If
+    
+    ' --------------------------------------------
+    ' TICKER SYMBOL
+    ' --------------------------------------------
+        
+    ' Check if we are still within the same ticker
+    If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+            
+    ' Set the Ticker name
+    Ticker = ws.Cells(i, 1).Value
+    
+    ' Print the Ticker in the Summary Table
+    ws.Range("I" & Summary_Table_Row).Value = Ticker
+    
+    ' --------------------------------------------
+    ' TOTAL STOCK VOLUME
+    ' --------------------------------------------
+
+    ' Add to the Stock Volume Total
+    TotalStockVolume = TotalStockVolume + ws.Cells(i, 7).Value
+
+    ' Print the Volume Amount to the Summary Table
+    ws.Range("L" & Summary_Table_Row).Value = TotalStockVolume
+
+    ' Reset the Stock Volume Total
+    TotalStockVolume = 0
+    
+    ' Add one to the summary table row
+    Summary_Table_Row = Summary_Table_Row + 1
+                              
+    Else
+            
+    ' Add to the Stock Volume Total
+    TotalStockVolume = TotalStockVolume + ws.Cells(i, 7).Value
+    End If
+     
+    
+    Next i
+    Next ws
+
+
+End Sub
