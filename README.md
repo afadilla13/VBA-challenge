@@ -7,4 +7,3 @@ And format to a different color depending on the value as it loops through.
 
 It also finds the ticker and value in percentage relating to the greatest increase and decrease.
 
-Shout out to mainly google, chatgpt and theodormoreland [in githu](https://github.com/theodoremoreland/YearlyStocks/blob/master/AnalyzeStockData.cls) who I referred to during the past week and made my own kind of VBA code for this challenge.
